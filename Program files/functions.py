@@ -1,18 +1,9 @@
 import yfinance as yf
 import matplotlib.pyplot as plt
+import pandas as pd
 
-def get_stock_data(stock_name, period):
-    stock_index = get_stock_index(stock_name)
-    stock_data_ticker = yf.Ticker(stock_index)
-    stock_data = stock_data_ticker.history(period)
-    return stock_data
 
-def display_graph(stock_data):
-    plt.plot(stock_data['Close'])
-    plt.show()
-
-def get_stock_index(stock_name):
-    stock_data = {
+STOCK_NAME_LIST_DATA = {
         "Adani Enterprises": "ADANIENT",
         "Adani Ports & SEZ": "ADANIPORTS",
         "Apollo Hospitals": "APOLLOHOSP",
@@ -64,9 +55,38 @@ def get_stock_index(stock_name):
         "UltraTech Cement": "ULTRACEMCO",
         "Wipro": "WIPRO"
     }
-    return stock_data[stock_name] + '.NS'
+
+TIMELINES = ["1d","5d", "1mo", "3mo", "6mo", "1y", "2y", "5y", "10y", "ytd", "max"]
+
+def get_stock_data(stock_name, period):
+    stock_index = get_stock_index(stock_name)
+    stock_data_ticker = yf.Ticker(stock_index)
+    stock_data = stock_data_ticker.history(period)
+    return stock_data
+
+def display_graph(stock_data):
+    plt.plot(stock_data['Close'])
+    plt.show()
+
+def get_stock_index(stock_name):
+    return STOCK_NAME_LIST_DATA[stock_name] + '.NS'
 
 def analyst_price_targets(stock_name):
     stock_index = get_stock_index(stock_name)
     stock_data_ticker = yf.Ticker(stock_index)
     return stock_data_ticker.analyst_price_targets
+
+def get_stock_names():
+    return [stock_name for stock_name in STOCK_NAME_LIST_DATA.keys()]
+
+def get_timeline():
+    return TIMELINES
+
+if __name__ == "__main__":
+    stock_data = get_stock_data('Wipro','1y')
+    list1 = [str(x).split()[0][5:] for x in stock_data.index]
+    data = [x for x in stock_data['Close']]
+    data = pd.Series(data,list1)
+    print(data)
+    plt.plot(data)
+    plt.show()
