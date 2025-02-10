@@ -143,8 +143,32 @@ def check_valid_time_period(time_period):
         return True
     return False
 
+def sort_stock_names(hint):
+    """
+        This function helps in sorting the stock names based on the letters typed
+    """
+    stocks = get_stock_names()
+    stocks_matching_hint = [stock for stock in stocks if stock.startswith(hint)]
+    rest_of_stocks = stocks.copy()
+    for stock in stocks_matching_hint:
+        rest_of_stocks.remove(stock)
+    sorted(rest_of_stocks)
+    stocks_matching_hint.extend(rest_of_stocks)
+    return stocks_matching_hint
+
+def sort_timeline(hint):
+    """
+        This function helps in sorting the timeline based on the letters typed
+    """
+    timelines = get_timeline()
+    timeline_matching_hint = [timeline for timeline in timelines if timeline.startswith(hint)]
+    rest_of_timeline = timelines.copy()
+    for timeline in timeline_matching_hint:
+        rest_of_timeline.remove(timeline)
+    sorted(rest_of_timeline)
+    timeline_matching_hint.extend(rest_of_timeline)
+    return timeline_matching_hint
+
 if __name__ == "__main__":
-    stock_index = get_stock_index("Adani Enterprises")
-    stock_data_ticker = yf.Ticker(stock_index)
-    with open("data.txt",'w') as file:
-        file.write(str(stock_data_ticker.info))
+    print(sort_timeline("5"))
+

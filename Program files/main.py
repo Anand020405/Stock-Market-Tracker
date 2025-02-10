@@ -33,9 +33,19 @@ previous_timeline_text = ""
 TimeOut = 1000
 while True:
     event, values = window.read(timeout=TimeOut)
-    print(event, values)
     if event == sg.WIN_CLOSED:
         break  
+    
+    if values['stock_name'] != "" and values['stock_name'] != previous_stock_name:
+        hint = values['stock_name'].title().strip()
+        window["stock_list"].update(functions.sort_stock_names(hint))
+        previous_stock_name = values['stock_name']
+
+    if values['timeline'] != "" and values['timeline'] != previous_timeline_text:
+        hint = values['timeline'].title().strip()
+        window["timeline_list"].update(functions.sort_timeline(hint))
+        previous_timeline_text = values['timeline']
+    
 
     if values['stock_list'] != [] and values['stock_list'][0] != previous_stock:
         window['stock_name'].update(value=values['stock_list'][0])
