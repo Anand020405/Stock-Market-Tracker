@@ -170,5 +170,7 @@ def sort_timeline(hint):
     return timeline_matching_hint
 
 if __name__ == "__main__":
-    print(sort_timeline("5"))
+
+    dat = yf.Ticker("MSFT")
+    print(dat.quarterly_income_stmt)
 
