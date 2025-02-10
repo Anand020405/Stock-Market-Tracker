@@ -1,8 +1,8 @@
 import yfinance as yf
 import matplotlib.pyplot as plt
 import pandas as pd
-
-
+import textwrap
+WIDTH = 100
 STOCK_NAME_LIST_DATA = {
         "Adani Enterprises": "ADANIENT",
         "Adani Ports & SEZ": "ADANIPORTS",
@@ -56,37 +56,95 @@ STOCK_NAME_LIST_DATA = {
         "Wipro": "WIPRO"
     }
 
-TIMELINES = ["1d","5d", "1mo", "3mo", "6mo", "1y", "2y", "5y", "10y", "ytd", "max"]
+TIMELINES = ["5d", "1mo", "6mo", "1y", "2y", "5y", "10y", "ytd", "max"]
 
-def get_stock_data(stock_name, period):
+def get_stock_data_for_graph(stock_name, period):
+    '''
+        This function helps in getting the stock data in order to develop a graph for it
+    '''
     stock_index = get_stock_index(stock_name)
     stock_data_ticker = yf.Ticker(stock_index)
     stock_data = stock_data_ticker.history(period)
     return stock_data
 
 def display_graph(stock_data):
+    '''
+        This function is used to display the graph using the obtained stock data
+    '''
     plt.plot(stock_data['Close'])
     plt.show()
 
 def get_stock_index(stock_name):
+    '''
+        This function is used to retrieve all the stock index using the names of the stock
+    '''
     return STOCK_NAME_LIST_DATA[stock_name] + '.NS'
 
-def analyst_price_targets(stock_name):
-    stock_index = get_stock_index(stock_name)
-    stock_data_ticker = yf.Ticker(stock_index)
-    return stock_data_ticker.analyst_price_targets
-
 def get_stock_names():
+    '''
+        This function is used to retrieve the stock names
+    '''
     return [stock_name for stock_name in STOCK_NAME_LIST_DATA.keys()]
 
 def get_timeline():
+    '''
+        This function helps in retriving all the available timeline for graph creation
+    '''
     return TIMELINES
 
+def get_stock_info(stock_name):
+    '''
+        This functions retrives all the available info of the stock and returns it in the form of a string
+    '''
+    stock_index = get_stock_index(stock_name)
+    stock_data_ticker = yf.Ticker(stock_index)
+    sector = wrap_text(stock_data_ticker.info['sector']).capitalize()
+    long_business_summary = wrap_text(stock_data_ticker.info['longBusinessSummary']).capitalize()
+    previous_close = wrap_text(stock_data_ticker.info['previousClose']).capitalize()
+    open = wrap_text(stock_data_ticker.info['open']).capitalize()
+    day_low = wrap_text(stock_data_ticker.info['dayLow']).capitalize()
+    day_high = wrap_text(stock_data_ticker.info['dayHigh']).capitalize()
+    dividend_yield = wrap_text(stock_data_ticker.info['dividendYield']).capitalize()
+    price_to_book = wrap_text(stock_data_ticker.info['priceToBook']).capitalize()
+    current_price = wrap_text(stock_data_ticker.info['currentPrice']).capitalize()
+    target_high_price = wrap_text(stock_data_ticker.info['targetHighPrice']).capitalize()
+    target_low_price = wrap_text(stock_data_ticker.info['targetLowPrice']).capitalize()
+    recommendation_key = wrap_text(stock_data_ticker.info['recommendationKey']).capitalize()
+    number_of_analyst_opinion = wrap_text(stock_data_ticker.info['numberOfAnalystOpinions']).capitalize()
+
+    
+    return_string = f"Sector: {sector} \nBusiness Summary: {long_business_summary}\nPrevious Close: {previous_close}\nOpen: {open}\nDay Low: {day_low}\nDay High: {day_high}\nDividend Yield: {dividend_yield}\nPrice to Book Value: {price_to_book}\nCurrent Price: {current_price}\nTarget High Price: {target_high_price}\nTarget Low Price: {target_low_price}\nRecommendation: {recommendation_key}\nNumber of Analyst: {number_of_analyst_opinion}\n"
+
+    return return_string
+
+def wrap_text(text):
+    """
+        This functions helps to convert a long string into a reasonable size for displaying on the screen
+    """
+    if type(text) != str:
+        text = str(text)
+    text_list = text.split()
+    length = 0
+    text = ""
+    for word in text_list:
+        length += len(word)
+        if length > WIDTH:
+            text += "\n\t"+word+" "
+            length = len(word)
+        else:
+            text += word + " "
+    return text
+
+def check_valid_time_period(time_period):
+    """
+        This function checks if the input timeline is valid or not
+    """
+    if time_period in TIMELINES:
+        return True
+    return False
+
 if __name__ == "__main__":
-    stock_data = get_stock_data('Wipro','1y')
-    list1 = [str(x).split()[0][5:] for x in stock_data.index]
-    data = [x for x in stock_data['Close']]
-    data = pd.Series(data,list1)
-    print(data)
-    plt.plot(data)
-    plt.show()
+    stock_index = get_stock_index("Adani Enterprises")
+    stock_data_ticker = yf.Ticker(stock_index)
+    with open("data.txt",'w') as file:
+        file.write(str(stock_data_ticker.info))
