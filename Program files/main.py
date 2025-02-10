@@ -72,8 +72,10 @@ while True:
             sg.popup("Enter a Valid Stock Name")
         
     if event == "data":
-        stock_name = values['stock_name']
-        stock_info = functions.get_stock_info(stock_name)
-        window["stock_info"].update(value=stock_info)
-
+        try:
+            stock_name = values['stock_name']
+            stock_info = functions.get_stock_info(stock_name)
+            window["stock_info"].update(value=stock_info)
+        except KeyError:
+            sg.popup("Enter a Valid Stock Name")
 window.close()
