@@ -30,7 +30,7 @@ previous_stock = ""
 previous_timeline = ""
 previous_stock_name = ""
 previous_timeline_text = ""
-TimeOut = 1000
+TimeOut = 50
 while True:
     event, values = window.read(timeout=TimeOut)
     if event == sg.WIN_CLOSED:
