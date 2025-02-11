@@ -1,5 +1,7 @@
 import functions
 import FreeSimpleGUI as sg
+import training
+import predict
 
 space1 = sg.Text("              ")
 space2 = sg.Text("              ")
@@ -15,12 +17,15 @@ timeline_listbox = sg.Listbox(functions.get_timeline(), size=(500, 5), key= 'tim
 
 show_graph_button = sg.Button("Show Graph", key="graph")
 stock_data_button = sg.Button("Get Data", key="data")
+ai_training_button = sg.Button("Train Using AI", key="ai_train")
+ai_predict_button = sg.Button("Predict Using AI", key="ai_predict")
+
 layout = [
     [stock_name_text,stock_name_input],
     [space1,stock_name_listbox],
     [timeline_text,timeline_input], 
     [space2, timeline_listbox],
-    [stock_data_button, show_graph_button],
+    [sg.Push(), stock_data_button, show_graph_button, ai_training_button, ai_predict_button, sg.Push()],
     [stock_info_text]
     ]
 
@@ -59,7 +64,6 @@ while True:
         try:
             stock_name = values['stock_name'].strip()
             time_period = values['timeline'].strip()
-            print(time_period)
             if time_period == "":
                 time_period = 'max'
             if functions.check_valid_time_period(time_period):
@@ -71,11 +75,36 @@ while True:
         except KeyError:
             sg.popup("Enter a Valid Stock Name")
         
-    if event == "data":
+    elif event == "data":
         try:
             stock_name = values['stock_name']
             stock_info = functions.get_stock_info(stock_name)
             window["stock_info"].update(value=stock_info)
         except KeyError:
             sg.popup("Enter a Valid Stock Name")
+
+    elif event == "ai_train":
+        try:
+            stock_name = values['stock_name']
+            stock_index = functions.get_stock_index(stock_name)
+            loss = training.NeuralNetworkModel(stock_name, window)
+            window["stock_info"].update(value=f"Training Complete. Loss = {loss}")
+            
+        except KeyError:
+            sg.popup("Enter a Valid Stock Name")
+    
+    elif event == "ai_predict":
+        try:
+            stock_name = values['stock_name']
+            stock_index = functions.get_stock_index(stock_name)
+            prediction = predict.predict(stock_index)
+            window["stock_info"].update(value=f"The AI Prediction for tomorrow is {prediction}")
+
+        except KeyError:
+            sg.popup("Enter a Valid Stock Name")
+
+        except MemoryError:
+            sg.popup("You need to train the AI first")
+    
+
 window.close()

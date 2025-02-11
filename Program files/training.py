@@ -45,7 +45,7 @@ class Model(nn.Module):
         return x
 
 
-def NeuralNetworkModel(stock_name, seed = 41, timeline = 'max', lr = 0.01, epochs = 1000, random_state = 42, test_size = 0.2):
+def NeuralNetworkModel(stock_name, window, seed = 41, timeline = 'max', lr = 0.01, epochs = 100, random_state = 42, test_size = 0.2):
     """
         Creates the neural network model for the particular stock
     """
@@ -56,8 +56,8 @@ def NeuralNetworkModel(stock_name, seed = 41, timeline = 'max', lr = 0.01, epoch
         model = torch.load(f"{stock_index}.pth", weights_only=False)
         model.eval()
     X,y = Data(stock_index, timeline)
-    training(X, y, model, stock_index, lr=lr, epochs= epochs, random_state=random_state, test_size=test_size)
-
+    loss = training(X, y, model, stock_index, window, lr=lr, epochs= epochs, random_state=random_state, test_size=test_size)
+    return loss
 
 def Data(stock_index, timeline = 'max'):
     """
@@ -89,7 +89,7 @@ def Data(stock_index, timeline = 'max'):
 
 
 
-def training(X, y, model, stock_index, lr = 0.01, epochs = 1000, random_state = 42, test_size = 0.2):
+def training(X, y, model, stock_index, window, lr = 0.0001, epochs = 1000, random_state = 42, test_size = 0.2):
     """
         Training the neural network
     """
@@ -113,7 +113,7 @@ def training(X, y, model, stock_index, lr = 0.01, epochs = 1000, random_state = 
         
         if i % 10 == 0:
             torch.save(model, f"{stock_index}.pth")
-            print(f'Epoch: {i} and loss: {loss}')
+            sg.popup_auto_close(f"Epoch: {i} and loss: {loss}", auto_close_duration=2)
 
         optimizer.zero_grad()
         loss.backward()
@@ -123,15 +123,8 @@ def training(X, y, model, stock_index, lr = 0.01, epochs = 1000, random_state = 
         y_eval = model.forward(X_test)
         loss = criterion(y_eval, y_test) 
 
-    print(f"Loss: ", loss)
+    return loss
 
-    correct = 0
-    with torch.no_grad():
-        for i, data in enumerate(X_test):
-            y_val = model.forward(data)
-
-        if y_val.argmax().item() == y_test[i]:
-            correct +=1
 
 if __name__ == "__main__":
     NeuralNetworkModel("Tata Consultancy Services")
