@@ -5,8 +5,15 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 import numpy as np
+import yfinance as yf
+import functions
+import os
+import FreeSimpleGUI as sg
 
 class Model(nn.Module):
+    """
+        Class for creating the neural netowrk framework
+    """
     def __init__(self, in_features=5, h1=1000, h2=1000, h3=1000, h4=1000, h5=1000, h6=1000, h7=1000, h8=1000, h9=1000, h10=1000, h11=1000, out_features=3):
         super().__init__()
         self.fc1 = nn.Linear(in_features, h1)
@@ -37,87 +44,94 @@ class Model(nn.Module):
         x = self.out(x)
         return x
 
-torch.manual_seed(41)
 
-model = Model()
-
-model = torch.load(r"C:\Users\bvana\Desktop\Apps\Stock Market Tracker\Program files\my_checkpoint1.pth", weights_only=False)
-model.eval()
-
-# Data
-import yfinance as yf
-import pandas as pd
-
-stock_index = "TCS.NS"
-stock_data_ticker = yf.Ticker(stock_index)
-data = stock_data_ticker.history('max')
-add_column = list(data['Close'])
-add_column.insert(0,28.42286491394043)
-add_column.pop()
-data['PreviousClose'] = add_column
-
-X = data.drop('Close', axis=1)
-X = X.drop('Dividends', axis=1)
-X = X.drop('Stock Splits', axis=1)
-close = data['Close']
-open = data['Open']
-new_list = []
-for x in data.index:
-    if open[x] < close[x]:
-        new_list.append(2)
-    elif open[x] > close[x]:
-        new_list.append(0)
-    else:
-        new_list.append(1)
-data['Target'] = new_list
-y = data['Target']
+def NeuralNetworkModel(stock_name, seed = 41, timeline = 'max', lr = 0.01, epochs = 1000, random_state = 42, test_size = 0.2):
+    """
+        Creates the neural network model for the particular stock
+    """
+    stock_index = functions.get_stock_index(stock_name)
+    torch.manual_seed(seed)
+    model = Model()
+    if os.path.exists(f"{stock_index}.pth"):
+        model = torch.load(f"{stock_index}.pth", weights_only=False)
+        model.eval()
+    X,y = Data(stock_index, timeline)
+    training(X, y, model, stock_index, lr=lr, epochs= epochs, random_state=random_state, test_size=test_size)
 
 
-# Data End
+def Data(stock_index, timeline = 'max'):
+    """
+        Obtain the data of the particular stock and organize the data for training the model
+    """
+    stock_data_ticker = yf.Ticker(stock_index)
+    data = stock_data_ticker.history(timeline)
+    add_column = list(data['Close'])
+    add_column.insert(0,28)
+    add_column.pop()
+    data['PreviousClose'] = add_column
 
-X = np.round(X.values).astype(int)
-y = np.round(y.values).astype(int)
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-X_train = torch.FloatTensor(X_train)
-X_test = torch.FloatTensor(X_test)
-y_train = torch.LongTensor(y_train)
-y_test = torch.LongTensor(y_test)
-
-criterion = nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=0.000001)
-
-
-epochs = 100
-losses = []
-for i in range(epochs):
-    y_pred = model.forward(X_train)
-    loss = criterion(y_pred, y_train) 
-    losses.append(loss.detach().numpy())
-    if i % 10 == 0:
-        torch.save(model, r"C:\Users\bvana\Desktop\Apps\Stock Market Tracker\Program files\my_checkpoint1.pth")
-        print(f'Epoch: {i} and loss: {loss}')
-
-    optimizer.zero_grad()
-    loss.backward()
-    optimizer.step()
+    X = data.drop('Close', axis=1)
+    X = X.drop('Dividends', axis=1)
+    X = X.drop('Stock Splits', axis=1)
+    close = data['Close']
+    open = data['Open']
+    new_list = []
+    for x in data.index:
+        if open[x] < close[x]:
+            new_list.append(2)
+        elif open[x] > close[x]:
+            new_list.append(0)
+        else:
+            new_list.append(1)
+    data['Target'] = new_list
+    y = data['Target']
+    return X,y
 
 
-with torch.no_grad():
-    y_eval = model.forward(X_test)
-    loss = criterion(y_eval, y_test) 
 
-print(f"Loss: ", loss)
+def training(X, y, model, stock_index, lr = 0.01, epochs = 1000, random_state = 42, test_size = 0.2):
+    """
+        Training the neural network
+    """
+    X = np.round(X.values).astype(int)
+    y = np.round(y.values).astype(int)
 
-correct = 0
-with torch.no_grad():
-    for i, data in enumerate(X_test):
-        y_val = model.forward(data)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = test_size, random_state=random_state)
+    X_train = torch.FloatTensor(X_train)
+    X_test = torch.FloatTensor(X_test)
+    y_train = torch.LongTensor(y_train)
+    y_test = torch.LongTensor(y_test)
 
-    if y_val.argmax().item() == y_test[i]:
-        correct +=1
+    criterion = nn.CrossEntropyLoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr)
 
-print(f'We got {correct} correct out of {i}')
+    losses = []
+    for i in range(epochs):
+        y_pred = model.forward(X_train)
+        loss = criterion(y_pred, y_train) 
+        losses.append(loss.detach().numpy())
+        
+        if i % 10 == 0:
+            torch.save(model, f"{stock_index}.pth")
+            print(f'Epoch: {i} and loss: {loss}')
 
-plt.plot(range(epochs), losses)
-plt.ylabel("loss/error")
-plt.xlabel('Epoch')
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+    with torch.no_grad():
+        y_eval = model.forward(X_test)
+        loss = criterion(y_eval, y_test) 
+
+    print(f"Loss: ", loss)
+
+    correct = 0
+    with torch.no_grad():
+        for i, data in enumerate(X_test):
+            y_val = model.forward(data)
+
+        if y_val.argmax().item() == y_test[i]:
+            correct +=1
+
+if __name__ == "__main__":
+    NeuralNetworkModel("Tata Consultancy Services")
