@@ -67,12 +67,12 @@ def get_stock_data_for_graph(stock_name, period):
     stock_data = stock_data_ticker.history(period)
     return stock_data
 
-def display_graph(stock_data):
+def display_graph(stock_data, stock_name):
     '''
         This function is used to display the graph using the obtained stock data
     '''
     plt.plot(stock_data['Close'])
-    plt.show()
+    plt.savefig(f'{stock_name}.png')
 
 def get_stock_index(stock_name):
     '''

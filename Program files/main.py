@@ -17,8 +17,11 @@ timeline_listbox = sg.Listbox(functions.get_timeline(), size=(500, 5), key= 'tim
 
 show_graph_button = sg.Button("Show Graph", key="graph")
 stock_data_button = sg.Button("Get Data", key="data")
-ai_training_button = sg.Button("Train Using AI", key="ai_train")
+ai_training_button = sg.Button("Train AI", key="ai_train")
 ai_predict_button = sg.Button("Predict Using AI", key="ai_predict")
+exit_button = sg.Button("Exit")
+
+graph_image = sg.Image(key = "graph_image", enable_events=True)
 
 layout = [
     [stock_name_text,stock_name_input],
@@ -26,10 +29,11 @@ layout = [
     [timeline_text,timeline_input], 
     [space2, timeline_listbox],
     [sg.Push(), stock_data_button, show_graph_button, ai_training_button, ai_predict_button, sg.Push()],
-    [stock_info_text]
+    [stock_info_text, graph_image],
+    [exit_button]
     ]
 
-width = 800
+width = 900
 window = sg.Window("Stock Market Tracker",layout=layout, size=(width,width))
 previous_stock = ""
 previous_timeline = ""
@@ -68,9 +72,12 @@ while True:
                 time_period = 'max'
             if functions.check_valid_time_period(time_period):
                 stock_data = functions.get_stock_data_for_graph(stock_name,time_period)
-                functions.display_graph(stock_data)
+                functions.display_graph(stock_data, stock_name)
             else:
                 sg.popup("Enter a Valid Timeline")
+            window["stock_info"].update(value="")
+            window["graph_image"].update(filename=f'{stock_name}.png')
+            
         
         except KeyError:
             sg.popup("Enter a Valid Stock Name")
@@ -79,12 +86,16 @@ while True:
         try:
             stock_name = values['stock_name']
             stock_info = functions.get_stock_info(stock_name)
+            window["graph_image"].update(filename=f'')
             window["stock_info"].update(value=stock_info)
+            
         except KeyError:
             sg.popup("Enter a Valid Stock Name")
 
     elif event == "ai_train":
         try:
+            window["graph_image"].update(filename=f'')
+            window["stock_info"].update(value=f"Training..... do not interrupt until training is complete")
             stock_name = values['stock_name']
             stock_index = functions.get_stock_index(stock_name)
             loss = training.NeuralNetworkModel(stock_name, window)
@@ -98,6 +109,7 @@ while True:
             stock_name = values['stock_name']
             stock_index = functions.get_stock_index(stock_name)
             prediction = predict.predict(stock_index)
+            window["graph_image"].update(filename=f'')
             window["stock_info"].update(value=f"The AI Prediction for tomorrow is {prediction}")
 
         except KeyError:
@@ -105,6 +117,9 @@ while True:
 
         except MemoryError:
             sg.popup("You need to train the AI first")
+        
+    elif event == "Exit":
+        break
     
 
 window.close()

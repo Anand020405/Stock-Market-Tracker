@@ -113,7 +113,7 @@ def training(X, y, model, stock_index, window, lr = 0.0001, epochs = 1000, rando
         
         if i % 10 == 0:
             torch.save(model, f"{stock_index}.pth")
-            sg.popup_auto_close(f"Epoch: {i} and loss: {loss}", auto_close_duration=2)
+            sg.popup_auto_close(f"Iteration: {i} and loss: {loss}", auto_close_duration=2)
 
         optimizer.zero_grad()
         loss.backward()
