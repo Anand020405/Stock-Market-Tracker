@@ -12,6 +12,7 @@ stock_info_text = sg.Text("",key="stock_info")
 stock_name_input = sg.InputText(key='stock_name', size=500)
 timeline_input = sg.InputText(key='timeline', size=500)
 
+
 stock_name_listbox = sg.Listbox(functions.get_stock_names(), size=(int(screen_width*0.40), 5), key='stock_list', enable_events=True)
 timeline_listbox = sg.Listbox(functions.get_timeline(), size=(int(screen_width*0.40), 5), key= 'timeline_list', enable_events=True)
 
@@ -21,7 +22,7 @@ ai_training_button = sg.Button("Train AI", key="ai_train")
 ai_predict_button = sg.Button("Predict Using AI", key="ai_predict")
 exit_button = sg.Button("Exit")
 
-graph_image = sg.Image(key = "graph_image", enable_events=True)
+graph_image = sg.Image(key = "graph_image", enable_events=True, size=(int(screen_width*0.7),int(screen_width*0.40)))
 
 layout = [
     [stock_name_text,stock_name_input],
@@ -30,8 +31,8 @@ layout = [
     [space2, timeline_listbox],
     [sg.Push(), stock_data_button, show_graph_button, ai_training_button, ai_predict_button, sg.Push()],
     [exit_button],
-    [stock_info_text, graph_image]
-    ]
+    [sg.Push(),stock_info_text, graph_image,sg.Push()]
+]
 
 window = sg.Window("Stock Market Tracker",layout=layout, size=(int(screen_width*0.75),int(screen_height*0.75)))
 previous_stock = ""
