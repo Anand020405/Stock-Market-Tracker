@@ -2,7 +2,10 @@ import yfinance as yf
 import matplotlib.pyplot as plt
 import pandas as pd
 import textwrap
-WIDTH = 100
+import FreeSimpleGUI as sg
+
+screen_width, screen_height = sg.Window.get_screen_size()
+WIDTH = int(screen_width*0.10)
 STOCK_NAME_LIST_DATA = {
         "Adani Enterprises": "ADANIENT",
         "Adani Ports & SEZ": "ADANIPORTS",
@@ -171,6 +174,5 @@ def sort_timeline(hint):
 
 if __name__ == "__main__":
 
-    dat = yf.Ticker("MSFT")
-    print(dat.quarterly_income_stmt)
+    print(get_stock_names())
 

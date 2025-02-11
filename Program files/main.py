@@ -3,17 +3,17 @@ import FreeSimpleGUI as sg
 import training
 import predict
 
+screen_width, screen_height = sg.Window.get_screen_size()
 space1 = sg.Text("              ")
 space2 = sg.Text("              ")
 stock_name_text = sg.Text("Stock:    ")
 timeline_text = sg.Text("Timeline: ")
 stock_info_text = sg.Text("",key="stock_info")
-
 stock_name_input = sg.InputText(key='stock_name', size=500)
 timeline_input = sg.InputText(key='timeline', size=500)
 
-stock_name_listbox = sg.Listbox(functions.get_stock_names(), size=(500, 5), key='stock_list', enable_events=True)
-timeline_listbox = sg.Listbox(functions.get_timeline(), size=(500, 5), key= 'timeline_list', enable_events=True)
+stock_name_listbox = sg.Listbox(functions.get_stock_names(), size=(int(screen_width*0.40), 5), key='stock_list', enable_events=True)
+timeline_listbox = sg.Listbox(functions.get_timeline(), size=(int(screen_width*0.40), 5), key= 'timeline_list', enable_events=True)
 
 show_graph_button = sg.Button("Show Graph", key="graph")
 stock_data_button = sg.Button("Get Data", key="data")
@@ -29,12 +29,11 @@ layout = [
     [timeline_text,timeline_input], 
     [space2, timeline_listbox],
     [sg.Push(), stock_data_button, show_graph_button, ai_training_button, ai_predict_button, sg.Push()],
-    [stock_info_text, graph_image],
-    [exit_button]
+    [exit_button],
+    [stock_info_text, graph_image]
     ]
 
-width = 900
-window = sg.Window("Stock Market Tracker",layout=layout, size=(width,width))
+window = sg.Window("Stock Market Tracker",layout=layout, size=(int(screen_width*0.75),int(screen_height*0.75)))
 previous_stock = ""
 previous_timeline = ""
 previous_stock_name = ""
