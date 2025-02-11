@@ -45,7 +45,7 @@ class Model(nn.Module):
         return x
 
 
-def NeuralNetworkModel(stock_name, window, seed = 41, timeline = 'max', lr = 0.01, epochs = 100, random_state = 42, test_size = 0.2):
+def NeuralNetworkModel(stock_name, window, seed = 41, timeline = 'max', lr = 0.1, epochs = 50, random_state = 42, test_size = 0.2):
     """
         Creates the neural network model for the particular stock
     """

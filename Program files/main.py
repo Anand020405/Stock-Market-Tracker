@@ -65,17 +65,18 @@ while True:
 
     if event == "graph":
         try:
+            window["graph_image"].update(filename=f'')
             stock_name = values['stock_name'].strip()
             time_period = values['timeline'].strip()
             if time_period == "":
                 time_period = 'max'
             if functions.check_valid_time_period(time_period):
                 stock_data = functions.get_stock_data_for_graph(stock_name,time_period)
-                functions.display_graph(stock_data, stock_name)
+                functions.display_graph(stock_data, stock_name, time_period)
             else:
                 sg.popup("Enter a Valid Timeline")
             window["stock_info"].update(value="")
-            window["graph_image"].update(filename=f'{stock_name}.png')
+            window["graph_image"].update(filename=f'{stock_name}_{time_period}.png')
             
         
         except KeyError:
